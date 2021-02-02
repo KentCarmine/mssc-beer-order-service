@@ -1,6 +1,5 @@
 guru\sfg\beer\order\service\bootstrap\BeerOrderBootStrap.class
 guru\sfg\beer\order\service\domain\Customer$CustomerBuilder.class
-guru\sfg\beer\order\service\domain\OrderStatusEnum.class
 guru\sfg\beer\order\service\web\controllers\BeerOrderController.class
 guru\sfg\beer\order\service\web\model\BeerOrderPagedList.class
 guru\sfg\beer\order\service\web\model\BeerOrderLineDto.class
@@ -18,10 +17,10 @@ guru\sfg\beer\order\service\web\model\BeerDto$BeerDtoBuilder.class
 guru\sfg\beer\order\service\web\mappers\BeerOrderLineMapperDecorator.class
 guru\sfg\beer\order\service\web\mappers\DateMapper.class
 guru\sfg\beer\order\service\web\model\CustomerDto$CustomerDtoBuilder.class
+guru\sfg\beer\order\service\domain\BeerOrderStatusEnum.class
 guru\sfg\beer\order\service\config\JMSConfig.class
 guru\sfg\beer\order\service\config\TaskConfig.class
 guru\sfg\beer\order\service\services\beer\BeerService.class
-guru\sfg\beer\order\service\web\mappers\BeerOrderMapperImpl$1.class
 guru\sfg\beer\order\service\repositories\BeerOrderLineRepository.class
 guru\sfg\beer\order\service\domain\Customer.class
 guru\sfg\beer\order\service\services\beer\BeerServiceImpl.class
@@ -29,6 +28,7 @@ guru\sfg\beer\order\service\services\BeerOrderService.class
 guru\sfg\beer\order\service\web\model\OrderStatusEnum.class
 guru\sfg\beer\order\service\repositories\BeerOrderRepository.class
 guru\sfg\beer\order\service\web\model\OrderStatusUpdate$OrderStatusUpdateBuilder.class
+guru\sfg\beer\order\service\domain\BeerOrderEventEnum.class
 guru\sfg\beer\order\service\web\mappers\BeerOrderMapper.class
 guru\sfg\beer\order\service\web\model\OrderStatusUpdate.class
 guru\sfg\beer\order\service\web\mappers\BeerOrderLineMapper.class
@@ -38,5 +38,6 @@ guru\sfg\beer\order\service\domain\BeerOrderLine.class
 guru\sfg\beer\order\service\services\BeerOrderServiceImpl.class
 guru\sfg\beer\order\service\web\model\CustomerDto.class
 guru\sfg\beer\order\service\domain\BaseEntity.class
+guru\sfg\beer\order\service\sm\BeerOrderStateMachineConfig.class
 guru\sfg\beer\order\service\web\mappers\BeerOrderLineMapperImpl_.class
 guru\sfg\beer\order\service\web\model\BaseItem.class
