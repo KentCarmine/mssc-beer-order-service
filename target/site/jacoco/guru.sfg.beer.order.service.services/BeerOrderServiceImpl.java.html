@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BeerOrderServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">mssc-beer-order-service</a> &gt; <a href="index.source.html" class="el_package">guru.sfg.beer.order.service.services</a> &gt; <span class="el_source">BeerOrderServiceImpl.java</span></div><h1>BeerOrderServiceImpl.java</h1><pre class="source lang-java linenums">/*
+ *  Copyright 2019 the original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see &lt;https://www.gnu.org/licenses/&gt;.
+ */
+
+package guru.sfg.beer.order.service.services;
+
+import guru.sfg.beer.order.service.domain.BeerOrder;
+import guru.sfg.beer.order.service.domain.Customer;
+import guru.sfg.beer.order.service.domain.OrderStatusEnum;
+import guru.sfg.beer.order.service.repositories.BeerOrderRepository;
+import guru.sfg.beer.order.service.repositories.CustomerRepository;
+import guru.sfg.beer.order.service.web.mappers.BeerOrderMapper;
+import guru.sfg.beer.order.service.web.model.BeerOrderDto;
+import guru.sfg.beer.order.service.web.model.BeerOrderPagedList;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+<span class="fc" id="L40">@Slf4j</span>
+@Service
+public class BeerOrderServiceImpl implements BeerOrderService {
+
+    private final BeerOrderRepository beerOrderRepository;
+    private final CustomerRepository customerRepository;
+    private final BeerOrderMapper beerOrderMapper;
+    private final ApplicationEventPublisher publisher;
+
+    public BeerOrderServiceImpl(BeerOrderRepository beerOrderRepository,
+                                CustomerRepository customerRepository,
+<span class="fc" id="L51">                                BeerOrderMapper beerOrderMapper, ApplicationEventPublisher publisher) {</span>
+<span class="fc" id="L52">        this.beerOrderRepository = beerOrderRepository;</span>
+<span class="fc" id="L53">        this.customerRepository = customerRepository;</span>
+<span class="fc" id="L54">        this.beerOrderMapper = beerOrderMapper;</span>
+<span class="fc" id="L55">        this.publisher = publisher;</span>
+<span class="fc" id="L56">    }</span>
+
+    @Override
+    public BeerOrderPagedList listOrders(UUID customerId, Pageable pageable) {
+<span class="nc" id="L60">        Optional&lt;Customer&gt; customerOptional = customerRepository.findById(customerId);</span>
+
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (customerOptional.isPresent()) {</span>
+<span class="nc" id="L63">            Page&lt;BeerOrder&gt; beerOrderPage =</span>
+<span class="nc" id="L64">                    beerOrderRepository.findAllByCustomer(customerOptional.get(), pageable);</span>
+
+<span class="nc" id="L66">            return new BeerOrderPagedList(beerOrderPage</span>
+<span class="nc" id="L67">                    .stream()</span>
+<span class="nc" id="L68">                    .map(beerOrderMapper::beerOrderToDto)</span>
+<span class="nc" id="L69">                    .collect(Collectors.toList()), PageRequest.of(</span>
+<span class="nc" id="L70">                    beerOrderPage.getPageable().getPageNumber(),</span>
+<span class="nc" id="L71">                    beerOrderPage.getPageable().getPageSize()),</span>
+<span class="nc" id="L72">                    beerOrderPage.getTotalElements());</span>
+        } else {
+<span class="nc" id="L74">            return null;</span>
+        }
+    }
+
+    @Transactional
+    @Override
+    public BeerOrderDto placeOrder(UUID customerId, BeerOrderDto beerOrderDto) {
+<span class="nc" id="L81">        Optional&lt;Customer&gt; customerOptional = customerRepository.findById(customerId);</span>
+
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if (customerOptional.isPresent()) {</span>
+<span class="nc" id="L84">            BeerOrder beerOrder = beerOrderMapper.dtoToBeerOrder(beerOrderDto);</span>
+<span class="nc" id="L85">            beerOrder.setId(null); //should not be set by outside client</span>
+<span class="nc" id="L86">            beerOrder.setCustomer(customerOptional.get());</span>
+<span class="nc" id="L87">            beerOrder.setOrderStatus(OrderStatusEnum.NEW);</span>
+
+<span class="nc" id="L89">            beerOrder.getBeerOrderLines().forEach(line -&gt; line.setBeerOrder(beerOrder));</span>
+
+<span class="nc" id="L91">            BeerOrder savedBeerOrder = beerOrderRepository.saveAndFlush(beerOrder);</span>
+
+<span class="nc" id="L93">            log.debug(&quot;Saved Beer Order: &quot; + beerOrder.getId());</span>
+
+            //todo impl
+            //  publisher.publishEvent(new NewBeerOrderEvent(savedBeerOrder));
+
+<span class="nc" id="L98">            return beerOrderMapper.beerOrderToDto(savedBeerOrder);</span>
+        }
+        //todo add exception type
+<span class="nc" id="L101">        throw new RuntimeException(&quot;Customer Not Found&quot;);</span>
+    }
+
+    @Override
+    public BeerOrderDto getOrderById(UUID customerId, UUID orderId) {
+<span class="nc" id="L106">        return beerOrderMapper.beerOrderToDto(getOrder(customerId, orderId));</span>
+    }
+
+    @Override
+    public void pickupOrder(UUID customerId, UUID orderId) {
+<span class="nc" id="L111">        BeerOrder beerOrder = getOrder(customerId, orderId);</span>
+<span class="nc" id="L112">        beerOrder.setOrderStatus(OrderStatusEnum.PICKED_UP);</span>
+
+<span class="nc" id="L114">        beerOrderRepository.save(beerOrder);</span>
+<span class="nc" id="L115">    }</span>
+
+    private BeerOrder getOrder(UUID customerId, UUID orderId) {
+<span class="nc" id="L118">        Optional&lt;Customer&gt; customerOptional = customerRepository.findById(customerId);</span>
+
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        if (customerOptional.isPresent()) {</span>
+<span class="nc" id="L121">            Optional&lt;BeerOrder&gt; beerOrderOptional = beerOrderRepository.findById(orderId);</span>
+
+<span class="nc bnc" id="L123" title="All 2 branches missed.">            if (beerOrderOptional.isPresent()) {</span>
+<span class="nc" id="L124">                BeerOrder beerOrder = beerOrderOptional.get();</span>
+
+                // fall to exception if customer id's do not match - order not for customer
+<span class="nc bnc" id="L127" title="All 2 branches missed.">                if (beerOrder.getCustomer().getId().equals(customerId)) {</span>
+<span class="nc" id="L128">                    return beerOrder;</span>
+                }
+            }
+<span class="nc" id="L131">            throw new RuntimeException(&quot;Beer Order Not Found&quot;);</span>
+        }
+<span class="nc" id="L133">        throw new RuntimeException(&quot;Customer Not Found&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>

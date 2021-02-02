@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TastingRoomService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">mssc-beer-order-service</a> &gt; <a href="index.source.html" class="el_package">guru.sfg.beer.order.service.services</a> &gt; <span class="el_source">TastingRoomService.java</span></div><h1>TastingRoomService.java</h1><pre class="source lang-java linenums">package guru.sfg.beer.order.service.services;
+
+import guru.sfg.beer.order.service.bootstrap.BeerOrderBootStrap;
+import guru.sfg.beer.order.service.domain.Customer;
+import guru.sfg.beer.order.service.repositories.BeerOrderRepository;
+import guru.sfg.beer.order.service.repositories.CustomerRepository;
+import guru.sfg.beer.order.service.web.model.BeerOrderDto;
+import guru.sfg.beer.order.service.web.model.BeerOrderLineDto;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
+
+@Service
+<span class="fc" id="L20">@Slf4j</span>
+public class TastingRoomService {
+
+    private final CustomerRepository customerRepository;
+    private final BeerOrderService beerOrderService;
+    private final BeerOrderRepository beerOrderRepository;
+<span class="fc" id="L26">    private final List&lt;String&gt; beerUpcs = new ArrayList&lt;&gt;(3);</span>
+
+    public TastingRoomService(CustomerRepository customerRepository, BeerOrderService beerOrderService,
+<span class="fc" id="L29">                              BeerOrderRepository beerOrderRepository) {</span>
+<span class="fc" id="L30">        this.customerRepository = customerRepository;</span>
+<span class="fc" id="L31">        this.beerOrderService = beerOrderService;</span>
+<span class="fc" id="L32">        this.beerOrderRepository = beerOrderRepository;</span>
+
+<span class="fc" id="L34">        beerUpcs.add(BeerOrderBootStrap.BEER_1_UPC);</span>
+<span class="fc" id="L35">        beerUpcs.add(BeerOrderBootStrap.BEER_2_UPC);</span>
+<span class="fc" id="L36">        beerUpcs.add(BeerOrderBootStrap.BEER_3_UPC);</span>
+<span class="fc" id="L37">    }</span>
+
+    @Transactional
+    @Scheduled(fixedRate = 2000) //run every 2 seconds
+    public void placeTastingRoomOrder() {
+
+<span class="fc" id="L43">        List&lt;Customer&gt; customerList = customerRepository.findAllByCustomerNameLike(BeerOrderBootStrap.TASTING_ROOM);</span>
+
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">        if (customerList.size() == 1) { //should be just one</span>
+<span class="nc" id="L46">            doPlaceOrder(customerList.get(0));</span>
+        } else {
+<span class="fc" id="L48">            log.error(&quot;Too many or too few tasting room customers found&quot;);</span>
+        }
+<span class="fc" id="L50">    }</span>
+
+    private void doPlaceOrder(Customer customer) {
+<span class="nc" id="L53">        String beerToOrder = getRandomBeerUpc();</span>
+
+<span class="nc" id="L55">        BeerOrderLineDto beerOrderLine = BeerOrderLineDto.builder()</span>
+<span class="nc" id="L56">                .upc(beerToOrder)</span>
+<span class="nc" id="L57">                .orderQuantity(new Random().nextInt(6)) //todo externalize value to property</span>
+<span class="nc" id="L58">                .build();</span>
+
+<span class="nc" id="L60">        List&lt;BeerOrderLineDto&gt; beerOrderLineSet = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L61">        beerOrderLineSet.add(beerOrderLine);</span>
+
+<span class="nc" id="L63">        BeerOrderDto beerOrder = BeerOrderDto.builder()</span>
+<span class="nc" id="L64">                .customerId(customer.getId())</span>
+<span class="nc" id="L65">                .customerRef(UUID.randomUUID().toString())</span>
+<span class="nc" id="L66">                .beerOrderLines(beerOrderLineSet)</span>
+<span class="nc" id="L67">                .build();</span>
+
+<span class="nc" id="L69">        BeerOrderDto savedOrder = beerOrderService.placeOrder(customer.getId(), beerOrder);</span>
+
+<span class="nc" id="L71">    }</span>
+
+    private String getRandomBeerUpc() {
+<span class="nc" id="L74">        return beerUpcs.get(new Random().nextInt(beerUpcs.size() - 0));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>
