@@ -1,7 +1,7 @@
 package guru.sfg.beer.order.service.web.mappers;
 
-import guru.sfg.beer.brewery.model.BeerOrderLineDto;
-import guru.sfg.beer.brewery.model.BeerOrderLineDto.BeerOrderLineDtoBuilder;
+import guru.sfg.brewery.model.BeerOrderLineDto;
+import guru.sfg.brewery.model.BeerOrderLineDto.BeerOrderLineDtoBuilder;
 import guru.sfg.beer.order.service.domain.BeerOrderLine;
 import guru.sfg.beer.order.service.domain.BeerOrderLine.BeerOrderLineBuilder;
 import javax.annotation.processing.Generated;
