@@ -25,7 +25,7 @@ public class ValidationResultListener {
 
         log.debug("### Validation result for Order Id: " + beerOrderId + " is : " + validateOrderResult.getIsValid());
 
-        beerOrderManager.sendBeerOrderValidatedEvent(beerOrderId, validateOrderResult.getIsValid());
+        beerOrderManager.processValidationResult(beerOrderId, validateOrderResult.getIsValid());
     }
 
 }
