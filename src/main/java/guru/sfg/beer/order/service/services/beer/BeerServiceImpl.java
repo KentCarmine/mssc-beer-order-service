@@ -12,8 +12,8 @@ import java.util.UUID;
 @ConfigurationProperties(prefix = "sfg.brewery", ignoreUnknownFields = false)
 @Service
 public class BeerServiceImpl implements BeerService {
-    public static final String BEER_ID_PATH_V1 = "/api/v1/beer";
-    public static final String BEER_UPC_PATH_V1 = "/api/v1/beerUpc";
+    public static final String BEER_ID_PATH_V1 = "/api/v1/beer/";
+    public static final String BEER_UPC_PATH_V1 = "/api/v1/beerUpc/";
 
     private final RestTemplate restTemplate;
 
@@ -29,11 +29,11 @@ public class BeerServiceImpl implements BeerService {
 
     @Override
     public Optional<BeerDto> getBeerById(UUID id) {
-        return Optional.of(restTemplate.getForObject(beerServiceHost + BEER_ID_PATH_V1 + "/" + id.toString(), BeerDto.class));
+        return Optional.of(restTemplate.getForObject(beerServiceHost + BEER_ID_PATH_V1 + id.toString(), BeerDto.class));
     }
 
     @Override
     public Optional<BeerDto> getBeerByUpc(String upc) {
-        return Optional.of(restTemplate.getForObject(beerServiceHost + BEER_UPC_PATH_V1 + "/" + upc, BeerDto.class));
+        return Optional.of(restTemplate.getForObject(beerServiceHost + BEER_UPC_PATH_V1 + upc, BeerDto.class));
     }
 }
