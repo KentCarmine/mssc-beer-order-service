@@ -84,7 +84,7 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
         beerOrderOptional.ifPresentOrElse(beerOrder -> {
             sendBeerOrderEvent(beerOrder, BeerOrderEventEnum.ALLOCATION_SUCCESS);
             updateAllocatedQty(beerOrderDto);
-        }, () -> log.error("Order not found in allocation passing. Id : " + beerOrderDto.getId()));
+        }, () -> log.error("### Order not found in allocation passing. Id : " + beerOrderDto.getId()));
     }
 
     @Override
@@ -93,7 +93,7 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
         beerOrderOptional.ifPresentOrElse(beerOrder -> {
             sendBeerOrderEvent(beerOrder, BeerOrderEventEnum.ALLOCATION_NO_INVENTORY);
             updateAllocatedQty(beerOrderDto);
-        }, () -> log.error("Order not found in allocation pending inventory. Id : " + beerOrderDto.getId()));
+        }, () -> log.error("### Order not found in allocation pending inventory. Id : " + beerOrderDto.getId()));
     }
 
     @Override
@@ -101,7 +101,15 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
         Optional<BeerOrder> beerOrderOptional = beerOrderRepository.findById(beerOrderDto.getId());
         beerOrderOptional.ifPresentOrElse(beerOrder -> {
             sendBeerOrderEvent(beerOrder, BeerOrderEventEnum.ALLOCATION_FAILED);
-        }, () -> log.error("Order not found in allocation failed. Id : " + beerOrderDto.getId()));
+        }, () -> log.error("### Order not found in allocation failed. Id : " + beerOrderDto.getId()));
+    }
+
+    @Override
+    public void beerOrderPickedUp(UUID orderId) {
+        Optional<BeerOrder> beerOrderOptional = beerOrderRepository.findById(orderId);
+        beerOrderOptional.ifPresentOrElse(beerOrder -> {
+            sendBeerOrderEvent(beerOrder, BeerOrderEventEnum.BEER_ORDER_PICKED_UP);
+        }, () -> log.error("### Order not found in picked up. Id : " + orderId));
     }
 
     private void updateAllocatedQty(BeerOrderDto beerOrderDto) {
@@ -116,7 +124,7 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
                 });
             });
             beerOrderRepository.saveAndFlush(allocatedOrder);
-        }, () -> log.error("Order not found in update allocated qty. Id : " + beerOrderDto.getId()));
+        }, () -> log.error("### Order not found in update allocated qty. Id : " + beerOrderDto.getId()));
     }
 
     private void sendBeerOrderEvent(BeerOrder beerOrder, BeerOrderEventEnum eventEnum) {
