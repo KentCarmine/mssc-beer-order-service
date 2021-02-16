@@ -36,8 +36,8 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
         beerOrder.setId(null);
         beerOrder.setOrderStatus(BeerOrderStatusEnum.NEW);
 
-        BeerOrder savedBeerOrder = beerOrderRepository.save(beerOrder);
-        System.out.println("### savedBeerOrder ID in newBeerOrder = " + savedBeerOrder.getId());
+        BeerOrder savedBeerOrder = beerOrderRepository.saveAndFlush(beerOrder);
+//        System.out.println("### savedBeerOrder ID in newBeerOrder = " + savedBeerOrder.getId());
 
         sendBeerOrderEvent(savedBeerOrder, BeerOrderEventEnum.VALIDATE_ORDER);
 
@@ -47,11 +47,11 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
     @Transactional
     @Override
     public void processValidationResult(UUID beerOrderId, Boolean isValid) {
-        log.error("Process Validation Result for beerOrderId: " + beerOrderId + " Valid? " + isValid);
+        log.debug("Process Validation Result for beerOrderId: " + beerOrderId + " Valid? " + isValid);
 
         Optional<BeerOrder> beerOrderOptional = beerOrderRepository.findById(beerOrderId);
 
-        System.out.println("### BeerOrderOptional in processValidationResult = " + beerOrderOptional);
+//        System.out.println("### BeerOrderOptional in processValidationResult = " + beerOrderOptional);
 
         beerOrderOptional.ifPresentOrElse(beerOrder -> {
             if (isValid) {

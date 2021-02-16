@@ -103,6 +103,10 @@ public class BeerOrderManagerImplIT {
 
         BeerOrder savedBeerOrder = beerOrderManager.newBeerOrder(beerOrder);
 
+//        System.out.println("### savedBeerOrder ID in testNewToAllocated: " + savedBeerOrder.getId());
+        System.out.println(beerOrderRepository.findAll().get(0).getId());
+        System.out.println(beerOrder.getId());
+
         await().untilAsserted(() -> {
             BeerOrder foundOrder = beerOrderRepository.findById(beerOrder.getId()).get();
 
