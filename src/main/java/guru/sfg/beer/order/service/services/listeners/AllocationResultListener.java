@@ -18,14 +18,19 @@ public class AllocationResultListener {
 
     @JmsListener(destination = JMSConfig.ALLOCATE_ORDER_RESPONSE_QUEUE)
     private void listen(@Payload AllocateOrderResult allocateOrderResult) {
-        if (allocateOrderResult.getAllocationError() && !allocateOrderResult.getPendingInventory()) {
+        System.out.println("### AllocationResultListener.listen called");
+        System.out.println(allocateOrderResult.toString());
+        if (!allocateOrderResult.getAllocationError() && !allocateOrderResult.getPendingInventory()) {
             // allocation successful
+            System.out.println("### Allocation successful");
             beerOrderManager.beerOrderAllocationPassed(allocateOrderResult.getBeerOrderDto());
         } else if (!allocateOrderResult.getAllocationError() && allocateOrderResult.getPendingInventory()) {
             // pending inventory
+            System.out.println("### Allocation pending inventory");
             beerOrderManager.beerOrderAllocationPendingInventory(allocateOrderResult.getBeerOrderDto());
         } else if (allocateOrderResult.getAllocationError()) {
             // allocation error
+            System.out.println("### Allocation error");
             beerOrderManager.beerOrderAllocationFailed(allocateOrderResult.getBeerOrderDto());
         }
     }
