@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,17 +19,33 @@ public class BeerOrderAllocationListener {
 
     @JmsListener(destination = JMSConfig.ALLOCATE_ORDER_QUEUE)
     public void listen(Message message) {
+        boolean hasValidationError = false;
+        boolean hasPendingInventory = false;
+
         AllocateOrderRequest request = (AllocateOrderRequest) message.getPayload();
 
         System.out.println("### in BeerOrderAllocationListener.listen. beerOrderDto ID: " + request.getBeerOrderDto().getId());
+        String customerRef = request.getBeerOrderDto().getCustomerRef();
+
+        if (customerRef != null && customerRef.equals("allocation-exception")) {
+            hasValidationError = true;
+        }
+
+        if (customerRef != null && customerRef.equals("partial-allocation")) {
+            hasPendingInventory = true;
+        }
 
         for (BeerOrderLineDto bolDto : request.getBeerOrderDto().getBeerOrderLines()) {
-            bolDto.setQuantityAllocated(bolDto.getOrderQuantity());
+            if (hasPendingInventory) {
+                bolDto.setQuantityAllocated(bolDto.getOrderQuantity() - 1);
+            } else {
+                bolDto.setQuantityAllocated(bolDto.getOrderQuantity());
+            }
         }
 
         jmsTemplate.convertAndSend(JMSConfig.ALLOCATE_ORDER_RESPONSE_QUEUE, AllocateOrderResult.builder()
-                .allocationError(false)
-                .pendingInventory(false)
+                .allocationError(hasValidationError)
+                .pendingInventory(hasPendingInventory)
                 .beerOrderDto(request.getBeerOrderDto())
                 .build());
     }
