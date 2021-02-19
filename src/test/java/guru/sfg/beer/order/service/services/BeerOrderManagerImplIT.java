@@ -219,7 +219,7 @@ public class BeerOrderManagerImplIT {
 
             assertEquals(BeerOrderStatusEnum.ALLOCATION_EXCEPTION, foundOrder.getOrderStatus());
         });
-        
+
         AllocationFailureEvent afe = (AllocationFailureEvent) jmsTemplate.receiveAndConvert(JMSConfig.ALLOCATE_ORDER_FAILURE_QUEUE);
 
         assertNotNull(afe);
